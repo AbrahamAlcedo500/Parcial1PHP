@@ -36,35 +36,14 @@ class Colaborador {
         return $this->pdo->query("SELECT id, Nombre FROM cat_tipoempleado")->fetchAll();
     }
 
-    // --- MÉTODOS DE INSERCIÓN DISTRIBUIDA (MANDAN LA DATA A LAS VISTAS/TABLAS DE LA PROFE) ---
-    
-    public function insertarEnSexo($id, $nombre) {
-        $stmt = $this->pdo->prepare("INSERT INTO ` cat_sexo` (id, nombre) VALUES (?, ?) ON DUPLICATE KEY UPDATE nombre = VALUES(nombre)");
-        return $stmt->execute([$id, $nombre]);
-    }
-
-    public function insertarEnEstadoCivil($id, $nombre) {
-        $stmt = $this->pdo->prepare("INSERT INTO cat_estadocivil (id, nombre) VALUES (?, ?) ON DUPLICATE KEY UPDATE nombre = VALUES(nombre)");
-        return $stmt->execute([$id, $nombre]);
-    }
-
-    public function insertarEnRuta($id, $nombre) {
-        $stmt = $this->pdo->prepare("INSERT INTO cat_rutas (id, Nombre) VALUES (?, ?) ON DUPLICATE KEY UPDATE Nombre = VALUES(Nombre)");
-        return $stmt->execute([$id, $nombre]);
-    }
-
-    public function insertarEnTipoEmpleado($id, $nombre) {
-        $stmt = $this->pdo->prepare("INSERT INTO cat_tipoempleado (id, Nombre) VALUES (?, ?) ON DUPLICATE KEY UPDATE Nombre = VALUES(Nombre)");
-        return $stmt->execute([$id, $nombre]);
-    }
-
-    public function insertarEnOcupacion($id, $nombre) {
-        $stmt = $this->pdo->prepare("INSERT INTO cat_ocupaciones (C_OCUP, OCUPACION) VALUES (?, ?) ON DUPLICATE KEY UPDATE OCUPACION = VALUES(OCUPACION)");
-        return $stmt->execute([$id, $nombre]);
-    }
-
-    public function insertarEnMotivoTerminacion($id, $nombre) {
-        $stmt = $this->pdo->prepare("INSERT INTO cat_motivos_terminacion (C_TERMINACION, MOTIVO) VALUES (?, ?) ON DUPLICATE KEY UPDATE MOTIVO = VALUES(MOTIVO)");
-        return $stmt->execute([$id, $nombre]);
+   public function insertarColaborador($datos) {
+        $sql = "INSERT INTO colaboradores (
+                    identidad, nombre, apellido, edad, tipo_sangre, sexo_id, 
+                    estado_civil_id, nacionalidad, ruta_id, celular, correo, 
+                    puesto_id, salario, planilla_id, fecha_inicio, fecha_fin, motivo_baja_id
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute($datos);
     }
 }

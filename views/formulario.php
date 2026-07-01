@@ -5,186 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario de Contratación - iTECH</title>
     <style>
-        /* ==========================================
-           ESTILOS MODERNOS - CREADOS PARA EL PARCIAL
-           ========================================== */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background: #f4f7f6;
-            color: #333;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            padding: 40px 20px;
-        }
-
-        /* Contenedor del Formulario */
-        .container {
-            background: #ffffff;
-            max-width: 800px;
-            width: 100%;
-            padding: 35px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-            border-top: 6px solid #0056b3;
-            position: relative;
-        }
-
-        .header-acciones {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 15px;
-        }
-
-        h2 {
-            color: #0056b3;
-            font-weight: 600;
-            letter-spacing: -0.5px;
-        }
-
-        /* Botón de Excel Fino */
-        .btn-excel {
-            background-color: #1f7246;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background 0.2s ease;
-            box-shadow: 0 4px 10px rgba(31, 114, 70, 0.2);
-        }
-
-        .btn-excel:hover {
-            background-color: #13482c;
-        }
-
-        /* Grid del Formulario - Doble Columna */
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 18px;
-            margin-bottom: 25px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .full-width {
-            grid-column: span 2;
-        }
-
-        label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #555;
-            margin-bottom: 6px;
-        }
-
-        /* Inputs y Selects */
-        input[type="text"],
-        input[type="number"],
-        input[type="email"],
-        input[type="date"],
-        select {
-            width: 100%;
-            padding: 11px 14px;
-            font-size: 0.95rem;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            background-color: #fafafa;
-            transition: all 0.25s ease;
-            outline: none;
-        }
-
-        input:focus, select:focus {
-            border-color: #0056b3;
-            background-color: #fff;
-            box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.15);
-        }
-
-        /* Botón Guardar */
-        .btn-guardar {
-            width: 100%;
-            padding: 14px;
-            background: #0056b3;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 1.05rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s ease, transform 0.1s ease;
-            box-shadow: 0 4px 12px rgba(0, 86, 179, 0.2);
-        }
-
-        .btn-guardar:hover {
-            background: #004085;
-        }
-
-        .btn-guardar:active {
-            transform: scale(0.99);
-        }
-
-        /* Alertas de Feedback */
-        .alert {
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            font-size: 0.95rem;
-            font-weight: 500;
-            text-align: center;
-        }
-        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-
-        /* Tabla Escondida de apoyo para la exportación */
-        #tabla-datos-exportar {
-            display: none;
-        }
-
-        /* Celulares */
-        @media (max-width: 600px) {
-            .form-grid { grid-template-columns: 1fr; }
-            .full-width { grid-column: span 1; }
-            .header-acciones { flex-direction: column; gap: 15px; text-align: center; }
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f4f7f6; color: #333; display: flex; justify-content: center; padding: 40px 20px; }
+        .container { background: #ffffff; max-width: 800px; width: 100%; padding: 35px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); border-top: 6px solid #0056b3; }
+        .header-acciones { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px; }
+        h2 { color: #0056b3; }
+        .btn-excel { background-color: #1f7246; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; }
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-bottom: 25px; }
+        .form-group { display: flex; flex-direction: column; }
+        .full-width { grid-column: span 2; }
+        input, select { width: 100%; padding: 11px; border: 1px solid #ccc; border-radius: 6px; }
+        .btn-guardar { width: 100%; padding: 14px; background: #0056b3; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+        .alert { padding: 12px; border-radius: 6px; margin-bottom: 20px; text-align: center; }
+        .alert-success { background-color: #d4edda; color: #155724; }
+        .alert-error { background-color: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        
-        <div class="header-acciones">
-            <h2>Formulario de Contratación</h2>
-            <button type="button" class="btn-excel" onclick="exportarExcel()">
-                📊 Exportar a Excel
-            </button>
+<div class="container">
+    <div class="header-acciones">
+        <h2>Formulario de Contratación</h2>
+        <div style="display: flex; gap: 10px;">
+            <a href="./views/reporte.php" style="text-decoration: none; background-color: #0056b3; color: white; padding: 10px 16px; font-size: 0.9rem; font-weight: 600; border-radius: 6px;">📋 Ver Reporte</a>
+            <button type="button" class="btn-excel" onclick="exportarExcel()">📊 Exportar a Excel</button>
         </div>
+    </div>
 
-        <?php if (isset($resultado)): ?>
-            <div class="alert alert-<?php echo $resultado['status']; ?>">
-                <?php echo $resultado['message']; ?>
-            </div>
-        <?php endif; ?>
+    <?php if (isset($resultado)): ?>
+        <div class="alert alert-<?php echo $resultado['status']; ?>">
+            <?php echo $resultado['message']; ?>
+        </div>
+    <?php endif; ?>
 
-        <form action="index.php" method="POST">
+<form action="index.php" method="POST">
             
             <div class="form-grid">
                 
@@ -320,18 +174,7 @@
             <button type="submit" class="btn-guardar">Guardar y Distribuir Registro</button>
         </form>
     </div>
-
-    <table id="tabla-datos-exportar">
-        <thead>
-            <tr>
-                <th>Campo</th>
-                <th>Valor Ingresado</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-
-    <script>
+ <script>
         function exportarExcel() {
             const tbody = document.querySelector("#tabla-datos-exportar tbody");
             tbody.innerHTML = ""; 
@@ -389,5 +232,6 @@
             document.body.removeChild(link);
         }
     </script>
+
 </body>
 </html>

@@ -1,63 +1,112 @@
 <?php
-// controllers/ColaboradorController.php
-
-require_once dirname(__DIR__) . '/models/Colaborador.php';
+require_once __DIR__ . '/../config/Conexion.php';
 
 class ColaboradorController {
-    private $modelo;
+    private $pdo;
 
-    public function __construct($pdo) {
-        $this->modelo = new Colaborador($pdo);
+    public function __construct() {
+        $conexion = new Conexion();
+        $this->pdo = $conexion->conectar();
     }
 
-    public function procesarFormulario($post) {
+    public function procesarFormulario($postData) {
         try {
-            // Evitamos el Deprecated de trim asegurando que si viene vacío sea un string "" y no null
-            $identidad    = trim($post['identidad'] ?? '');
-            $nombre       = trim($post['nombre'] ?? '');
-            $apellido     = trim($post['apellido'] ?? '');
-            $edad         = trim($post['edad'] ?? '');
-            $tipo_sangre  = trim($post['tipo_sangre'] ?? '');
-            $sexo         = trim($post['sexo'] ?? '');
-            $estado_civil = trim($post['estado_civil'] ?? '');
-            $nacionalidad = trim($post['nacionalidad'] ?? '');
-            $ruta         = trim($post['ruta'] ?? '');
-            $correo       = trim($post['correo'] ?? '');
-            $celular      = trim($post['celular'] ?? '');
-            $puesto       = trim($post['puesto'] ?? '');
-            $salario      = trim($post['salario'] ?? '');
-            $planilla     = trim($post['planilla'] ?? '');
-            $fecha_inicio = trim($post['fecha_inicio'] ?? '');
-            
-            // Campos opcionales que causaban el error en tu captura
-            $fecha_fin    = trim($post['fecha_fin'] ?? '');
-            $motivo_baja  = trim($post['motivo_baja'] ?? '');
+            // 1. Recoger los datos del POST
+            $identidad    = $postData['identidad'] ?? '';
+            $edad         = $postData['edad'] ?? 0;
+            $nombre       = $postData['nombre'] ?? '';
+            $apellido     = $postData['apellido'] ?? '';
+            $tipo_sangre  = $postData['tipo_sangre'] ?? '';
+            $sexo         = $postData['sexo'] ?? null;
+            $estado_civil = $postData['estado_civil'] ?? null;
+            $nacionalidad = $postData['nacionalidad'] ?? '';
+            $ruta         = $postData['ruta'] ?? null;
+            $celular      = $postData['celular'] ?? '';
+            $correo       = $postData['correo'] ?? '';
+            $puesto       = $postData['puesto'] ?? null;
+            $salario      = $postData['salario'] ?? 0.00;
+            $planilla     = $postData['planilla'] ?? null;
+            $fecha_inicio = $postData['fecha_inicio'] ?? '';
+            $fecha_fin    = !empty($postData['fecha_fin']) ? $postData['fecha_fin'] : null;
+            $motivo_baja  = !empty($postData['motivo_baja']) ? $postData['motivo_baja'] : null;
 
-            // Validación de que los datos primordiales no vengan vacíos
-            if (empty($nombre) || empty($apellido) || empty($identidad)) {
-                return ['status' => 'error', 'message' => 'Faltan datos requeridos en el formulario.'];
+            // 2. LA RECETA: Cadena exacta solicitada para la firma digital
+            $datosA_Firmar = $identidad . "," . $correo . "," . $salario . "," . $fecha_inicio;
+
+            // 3. CONFIGURACIÓN DE OPENSSL PARA WINDOWS / WAMP64
+            $configOpenSSL = array(
+                "config" => "C:/wamp64/bin/php/php" . PHP_VERSION . "/extras/ssl/openssl.cnf",
+                "private_key_bits" => 2048,
+                "private_key_type" => OPENSSL_KEYTYPE_RSA,
+            );
+
+            // Generar par de llaves en memoria
+            $resKeys = openssl_pkey_new($configOpenSSL);
+
+            // Intento alternativo por si la ruta de configuración varía en tu Wamp
+            if (!$resKeys) {
+                $configOpenSSL["config"] = "C:/wamp64/bin/apache/apache" . substr(apache_get_version(), 7, 6) . "/conf/openssl.cnf";
+                $resKeys = openssl_pkey_new($configOpenSSL);
             }
 
-            // Sanitización contra XSS
-            $nombre   = htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8');
-            $apellido = htmlspecialchars($apellido, ENT_QUOTES, 'UTF-8');
-
-            // DISTRIBUCIÓN E INSERCIÓN CRÍTICA EN LAS 6 TABLAS DISPONIBLES
-            // Guardamos las distintas partes del colaborador en cada catálogo
-            $this->modelo->insertarEnSexo($sexo, $nombre); 
-            $this->modelo->insertarEnEstadoCivil($estado_civil, $apellido);
-            $this->modelo->insertarEnRuta($ruta, $nacionalidad);
-            $this->modelo->insertarEnTipoEmpleado($planilla, $identidad);
-            $this->modelo->insertarEnOcupacion($puesto, $correo);
-            
-            if (!empty($motivo_baja)) {
-                $this->modelo->insertarEnMotivoTerminacion($motivo_baja, "Baja: " . $fecha_fin);
+            if (!$resKeys) {
+                throw new Exception("No se pudo inicializar OpenSSL. Asegúrate de tener la extensión activada en Wamp.");
             }
 
-            return ['status' => 'success', 'message' => '¡Datos del colaborador distribuidos e insertados con éxito en las 6 tablas de catálogos!'];
+            // Exportar la llave privada para efectuar la firma
+            $privateKey = '';
+            openssl_pkey_export($resKeys, $privateKey, null, $configOpenSSL);
+
+            // 4. GENERAR LA FIRMA DIGITAL BINARIA Y PASAR A BASE64
+            $firmaBinaria = '';
+            openssl_sign($datosA_Firmar, $firmaBinaria, $privateKey, OPENSSL_ALGO_SHA256);
+            $firmaBase64 = base64_encode($firmaBinaria);
+
+            // 5. INSERTAR EN LA BASE DE DATOS (Sin la columna llave_publica)
+            $sql = "INSERT INTO colaboradores (
+                        identidad, edad, nombre, apellido, tipo_sangre, sexo_id, 
+                        estado_civil_id, nacionalidad, ruta_id, celular, correo, 
+                        puesto_id, salario, planilla_id, fecha_inicio, fecha_fin, 
+                        motivo_baja_id, firma_digital
+                    ) VALUES (
+                        :identidad, :edad, :nombre, :apellido, :tipo_sangre, :sexo, 
+                        :estado_civil, :nacionalidad, :ruta, :celular, :correo, 
+                        :puesto, :salario, :planilla, :fecha_inicio, :fecha_fin, 
+                        :motivo_baja, :firma
+                    )";
+
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([
+                ':identidad'    => $identidad,
+                ':edad'         => $edad,
+                ':nombre'       => $nombre,
+                ':apellido'     => $apellido,
+                ':tipo_sangre'  => $tipo_sangre,
+                ':sexo'         => $sexo,
+                ':estado_civil' => $estado_civil,
+                ':nacionalidad' => $nacionalidad,
+                ':ruta'         => $ruta,
+                ':celular'      => $celular,
+                ':correo'       => $correo,
+                ':puesto'       => $puesto,
+                ':salario'      => $salario,
+                ':planilla'     => $planilla,
+                ':fecha_inicio' => $fecha_inicio,
+                ':fecha_fin'    => $fecha_fin,
+                ':motivo_baja'  => $motivo_baja,
+                ':firma'        => $firmaBase64
+            ]);
+
+            return [
+                'status' => 'success',
+                'message' => '¡Registro guardado y firmado digitalmente con éxito!'
+            ];
 
         } catch (Exception $e) {
-            return ['status' => 'error', 'message' => "Error en la transacción SQL: " . $e->getMessage()];
+            return [
+                'status' => 'error',
+                'message' => 'Error en el controlador: ' . $e->getMessage()
+            ];
         }
     }
 }
